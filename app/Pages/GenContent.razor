@@ -1,0 +1,18 @@
+@page "/gencontent"
+<h3>GenContent</h3>
+<form id="params">
+    <label for="colCount" title="Col Count">Col Count</label>
+    @ColCount
+    <input id="colCount" name="colCount" type="number" min="1" max="20"
+           @bind="@ColCount"/>
+</form>
+
+
+@code {
+    private int ColCount { get; set; } = 1;
+    
+    private void ColCountChange()
+    {
+        Console.WriteLine($"Change.  Value {ColCount}");
+    }
+}
