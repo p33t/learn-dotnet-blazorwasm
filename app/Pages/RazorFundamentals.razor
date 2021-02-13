@@ -1,0 +1,49 @@
+@page "/razorfundamentals"
+<h3>Razor Fundamentals</h3>
+<p>
+    An illustration of Razor fundamentals from
+    <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0">Syntax Reference for ASP.NET</a>
+    <strong>except that blazor has slightly different rules</strong> as noted.
+</p>
+
+<h4>C# Expression</h4>
+<p>
+    @@ Is used to render C# like this date: @DateTime.Today
+    <br/>
+    Unless it's a part of some content: <a href="mailto:Support@contoso.com">Support@contoso.com</a>
+    <br/>
+    Add (parents) for complex expressions: @("Hello " + "World")
+    <br/>
+    @@ encodes to html too: @RawHtml
+    <br/>
+    But literal html can be rendered with <del>@@Html.Raw()</del>.. actually, for Blazor is @@((MarkupString).. : @((MarkupString) RawHtml)
+</p>
+
+<h4>C# Code Block</h4>
+<p>
+    @@{..} for blocks that execute in order. Counter is now:
+    @{ _counter++; }
+    @_counter
+    <br/>
+    But they can transition back to HTML:
+    @{
+        _counter++;
+        <span> Counter is now @_counter</span>
+    }
+    <br/>
+    Razor tag &lt;text> can be used to render content that has no tags or to control whitespace. E.g.
+</p>
+<pre>@{
+         <span>Using &lt;span> 1.</span>
+         <span>Using &lt;span> 2.</span>
+     }</pre>
+<pre>@{
+         <text>Using &lt;text> 1.</text>
+         <text>Using &lt;text> 2.</text>
+     }</pre>
+
+@code {
+    // Why does formatter indent this?
+        private const string RawHtml = "<a href='#'>Raw Html</a>";
+    private int _counter = 0;
+}
