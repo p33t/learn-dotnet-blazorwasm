@@ -1,0 +1,172 @@
+@page "/razorfundamentals"
+<h3>Razor Fundamentals</h3>
+<p>
+    An illustration of Razor fundamentals from
+    <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0">Syntax Reference for ASP.NET</a>
+    <strong>except that blazor has slightly different rules</strong> as noted.
+</p>
+
+<h4>C# Expression</h4>
+<p>
+    @@ Is used to render C# like this date: @DateTime.Today
+    <br/>
+    Unless it's a part of some content: <a href="mailto:Support@contoso.com">Support@contoso.com</a>
+    <br/>
+    Add (parents) for complex expressions: @("Hello " + "World")
+    <br/>
+    @@ encodes to html too: @RawHtml
+    <br/>
+    But literal html can be rendered with <del>@@Html.Raw()</del>.. actually, for Blazor is @@((MarkupString).. : @((MarkupString) RawHtml)
+</p>
+
+<h4>C# Code Block</h4>
+<p>
+    @@{..} for blocks that execute in order. Counter is now:
+    @{ _counter++; }
+    @_counter
+    <br/>
+    But they can transition back to HTML:
+    @{
+        _counter++;
+        <span> Counter is now @_counter</span>
+    }
+    <br/>
+    Razor tag &lt;text> can be used to render content that has no tags or to control whitespace. E.g.
+</p>
+<pre>@{
+         <span>Using &lt;span> 1.</span>
+         <span>Using &lt;span> 2.</span>
+     }</pre>
+<pre>@{
+         <text>Using &lt;text> 1.</text>
+         <text>Using &lt;text> 2.</text>
+     }</pre>
+<p>
+    @{
+        @:@@: does something similar except for the rest of the current line
+    }
+</p>
+
+<h4>Control Structures</h4>
+<p>
+    Various control structures for rendering conditional or collections of content.
+    <br/>
+    @if (DateTime.Today.Day % 2 == 0)
+    {
+        @:Even Day
+    }
+    else
+    {
+        @:Odd Day
+    }
+    <br/>
+    @for (var i = 0; i < 3; i++)
+    {
+        @: Loop #@(i + 1).
+    }
+    <br/>
+    @foreach (var ch in "abcdefg")
+    {
+        @: @(ch).
+    }
+</p>
+
+<h4>Components over Helpers</h4>
+<p>
+    Helpers are NOT supported in Blazor.  Components (formerly Razor Components) are the unit of reuse 
+    (<a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0">ref</a>.
+</p>
+
+<h4>Try Catch Finally</h4>
+<p>
+    This throws an exception randomly.  Refresh the page to try again!
+    <br/>
+    @try
+    {
+        if (new Random().Next(2) == 1) throw new Exception("Random Exception!");
+        @: No exception thrown. <br/>
+    }
+    catch (Exception ex)
+    {
+        @: Exception occured:
+        <pre>@ex</pre><br/>
+    }
+    finally
+    {
+        @: Thank goodness that's over.<br/>
+    }
+</p>
+
+<h4>Locks</h4>
+<p>
+    Can serialize execution of critical parts of code with <code>@@lock</code>.
+    Later: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0#lock
+</p>
+
+<h4>Directives</h4>
+<p>To influence view generation.  Are supplied in top level (vs Directive Attributes below)</p>
+<p>
+    Razor pages generate C# code much like JSP.
+    See <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0#inspect-the-razor-c-class-generated-for-a-view">How to inspect</a>
+</p>
+
+<p>
+    @@attribute [AttributeToAddToGeneratedClass]<br/>
+    @@function { "C# members" }<br/>
+    @@code { "C# members to add to <em>Razor Components</em> only" }<br/>
+    &nbsp;Prefered to @@functions (for RCs)<br/>
+    @@implements, @@inherits for specific interface/class parents<br/>
+    @@layout for specifying the layout for a 'routable' @@page (if default layout is inadequate) or 
+    the layout differs from that of other pages in the folder, which may rely on a local `_Imports.razor`
+    containing @@layout directive.<br/>
+    @@namespace is for placing the resulting class in the given namespace.
+    @@page meaning depends on `.cshtml` (razor page) vs `.razor` (razor component).  Later means routable and can handle requests.
+    @@preservewhitespace Override with 'true' to include incidental whitespace (default false).<br/>
+    @@using The usual
+    
+    <br/>
+    @@model is only for MVC views and indicates the generic type of the parent 
+    RazorPage class (which is &lt;dynamic> by default).  A `@@Model` property is then available.<br/>
+    @@section only for MVC views to supply content to different parts of a layout.
+    
+
+</p>
+
+<p>
+    @inject ISomeService SomeService
+    Use @@inject (and maybe @@using) to obtain instances to services.<br/>
+    Like SomeService.Hello() = @SomeService.Hello()
+</p>
+
+<h4>Directive Attributes</h4>
+<p>
+    Are supplied in attributes to tags (vs top leve Directives above).<br/>
+</p>
+<p>
+    @@attributes for supplying multiple attributes to a component via dictionaly-like &lt;string, object>.  AKA Attribute Splatting.<br/>
+    Womens results...<br/>
+    <RaceResult First="Susan" Second="Michelle" Third="Mary"/><br/>
+    Mens results...<br/>
+    <RaceResult @attributes="@mensResult"/>
+</p>
+<p>
+    RESUME: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0#bind
+</p>
+<h4>Miscellaneous</h4>
+<p>
+    @@* Comment *@@
+</p>
+
+@* TODO:  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#razor-syntax *@
+
+@code {
+    // Why does formatter indent this?
+        private const string RawHtml = "<a href='#'>Raw Html</a>";
+    private int _counter;
+    private readonly Dictionary<string, object> mensResult = new()
+    {
+        {"First", "John"},
+        {"Second", "Joe"},
+        {"Third", "Graham"},
+    };
+}
