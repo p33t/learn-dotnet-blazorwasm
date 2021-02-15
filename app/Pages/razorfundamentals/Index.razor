@@ -120,7 +120,8 @@
     the layout differs from that of other pages in the folder, which may rely on a local `_Imports.razor`
     containing @@layout directive.<br/>
     @@namespace is for placing the resulting class in the given namespace.
-    @@page meaning depends on `.cshtml` (razor page) vs `.razor` (razor component).  Later means routable and can handle requests.
+    @@page meaning depends on `.cshtml` (razor page) vs `.razor` (razor component).  Later means routable and can handle requests.<br/>
+    &nbsp;&nbsp;Can specify route parameters like <code>/my/path/{someArg}</code>
     @@preservewhitespace Override with 'true' to include incidental whitespace (default false).<br/>
     @@using The usual
     
@@ -180,6 +181,39 @@
     A function-oriented UI reuse mechanism.  Doesn't seem to be available in Blazor.
 </p>
 
+<h4>Razor Components</h4>
+<p>Extra learnings from <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#route-parameters">Razor Syntax</a>.</p>
+
+<ul>
+    Supply component parameters:
+    <li>event handlers with <code>EventCallback&lt;></code> type</li>
+    <li>content with <code>RenderFragment</code> type with caveat for loops (see below)</li>
+</ul>
+
+<p>
+    <UnecessaryComponent>Hello from a component.  Requires a <code>ChildContent</code> property.</UnecessaryComponent>
+    <br/>
+    Rendering content into components using the <strong> for loop var</strong> requires a local variable.<br/>
+    @for (var i = 0; i < 3; i++)
+    {
+        var current = i;
+        <UnecessaryComponent>#@(current + 1)</UnecessaryComponent>
+    }
+    <br/>
+    But <strong>foreach</strong> doesn't have this problem so using <code>Enumerable.Range</code> is cleaner.<br/>
+    @foreach (var current in Enumerable.Range(0, 3))
+    {
+        <UnecessaryComponent>#@(current + 1)</UnecessaryComponent>
+    }
+</p>
+
+<p>
+    'Attribute Splatting' can be used for convenient supplying of multiple parameters to a component (see above).<br/>
+    Capture arbitrary arguments in a dictionary-like parameter using <code>[Parameter(CaptureUnmatchedValues = true)]</code> is also possible.<br/>
+    <ArbitraryParametersComponent one="1" two="2" three="3" />
+    But beware use with splatting because 'last one wins'...<br/>
+    <ArbitraryParametersComponent First="Overwritten Value" @attributes="@mensResult"/>
+</p>
 
 <h4>Miscellaneous</h4>
 <p>

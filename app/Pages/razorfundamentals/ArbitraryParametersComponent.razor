@@ -1,0 +1,11 @@
+<p>
+    @foreach (var kv in NameDoesNotMatter)
+    {
+        @: @kv.Key = @kv.Value<br/>
+    }
+</p>
+
+@code {
+    [Parameter (CaptureUnmatchedValues = true)] // can only have 1 'true' parameter
+    public IEnumerable<KeyValuePair<string, object>> NameDoesNotMatter { get; set; }
+}
