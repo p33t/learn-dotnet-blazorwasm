@@ -149,15 +149,47 @@
     Mens results...<br/>
     <RaceResult @attributes="@mensResult"/>
 </p>
+
 <p>
-    RESUME: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-5.0#bind
+    @@bind for auto updating a field of property when an input is modified.  Different events can be employed
+    and there is a <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/data-binding?view=aspnetcore-5.0">form validation and binding</a>
+    features for better UX.
+    <br/>
+    This one changes on lost focus: <input @bind="boundedValue" /> Value: @boundedValue
+    <br/>
+    This on changes on each keystroke: <input @bind="boundedValueOnInput" @bind:event="oninput"/> Value: @boundedValueOnInput
 </p>
+
+<p>
+    @@on{EVENT} to trigger a (possibly async) method <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/event-handling?view=aspnetcore-5.0#event-argument-types">with args</a>
+    at the given event. <input type="checkbox" @onchange="OnCheckboxChange"> @checkboxChangedAt
+    <br/>
+    @@on{EVENT}:preventDefault to block the default behaviour.  Click does nothing: <input type="checkbox" @onclick:preventDefault>
+    <br/>
+    @@on{EVENT}:stopPropagation to block event propagation to outer elements.  E.g. <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/event-handling?view=aspnetcore-5.0#stop-event-propagation">click on nested div</a>.
+    <br/>
+    @@key for distinguishing between elements within a collection of components.
+    <br/>
+    @@ref for capturing a code reference to a component.  E.g. <input type="text" @ref="_refText"/> <button @onclick="FocusRefText">Focus Text</button>
+    <br/>
+    @@typeparam for use with genericized components
+</p>
+
+<h4>Templated Delegates</h4>
+<p>
+    A function-oriented UI reuse mechanism.  Doesn't seem to be available in Blazor.
+</p>
+
+
 <h4>Miscellaneous</h4>
 <p>
     @@* Comment *@@
 </p>
 
-@* TODO:  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#razor-syntax *@
+@* TODO:  
+  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#razor-syntax
+  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/lifecycle?view=aspnetcore-5.0
+*@
 
 @code {
     // Why does formatter indent this?
@@ -169,4 +201,23 @@
         {"Second", "Joe"},
         {"Third", "Graham"},
     };
+
+    private string boundedValue;
+    private string boundedValueOnInput;
+    private string checkboxChangedAt;
+    
+    private void OnCheckboxChange(ChangeEventArgs args)
+    {
+        checkboxChangedAt = $"Changed to {args.Value} at {DateTime.Now.ToLongTimeString()}";
+    }
+
+    private ElementReference _refText;
+
+    private void FocusRefText()
+    {
+        _refText.FocusAsync();
+    }
+
+    // Templated Razor Delegates don't appear to work
+    //Func<dynamic, object> petTemplate = @<p>You have a pet named <strong>@item.Name</strong>.</p>;    
 }
