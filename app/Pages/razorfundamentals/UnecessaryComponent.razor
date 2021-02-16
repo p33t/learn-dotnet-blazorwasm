@@ -2,6 +2,7 @@
 
 @code {
     // This appears to be a 'magic' parameter name indicating content within the tag.
+    // Multiple parameters of type 'RenderFragment' is possible but then <ChildContent> and other tags are required during usage.
     [Parameter]
     public RenderFragment ChildContent { get; set; }    
 }

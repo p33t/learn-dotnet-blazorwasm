@@ -1,4 +1,6 @@
 @page "/razorfundamentals"
+@using System.Timers
+@using Timer = System.Threading.Timer
 <h3>Razor Fundamentals</h3>
 <p>
     An illustration of Razor fundamentals from
@@ -169,7 +171,8 @@
     <br/>
     @@on{EVENT}:stopPropagation to block event propagation to outer elements.  E.g. <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/event-handling?view=aspnetcore-5.0#stop-event-propagation">click on nested div</a>.
     <br/>
-    @@key for distinguishing between elements within a collection of components.
+    @@key for distinguishing between elements within a collection of components, or making sure Blazor re-renders a modified object.
+    (<a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#when-to-use-key">ref</a>)
     <br/>
     @@ref for capturing a code reference to a component.  E.g. <input type="text" @ref="_refText"/> <button @onclick="FocusRefText">Focus Text</button>
     <br/>
@@ -212,18 +215,35 @@
     Capture arbitrary arguments in a dictionary-like parameter using <code>[Parameter(CaptureUnmatchedValues = true)]</code> is also possible.<br/>
     <ArbitraryParametersComponent one="1" two="2" three="3" />
     But beware use with splatting because 'last one wins'...<br/>
-    <ArbitraryParametersComponent First="Overwritten Value" @attributes="@mensResult"/>
+    <ArbitraryParametersComponent First="Overwritten Value" @attributes="@mensResult" Third="Retained Value"/>
+</p>
+
+<p>
+    <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#synchronization-context">SynchronizationContext</a>
+    is used to enforce a single logical thread of execution (server or client side).
+    To update a component in response to an external event (such as a timer or notification), use <code>InvokeAsync()</code> & <code>StateHasChanged()</code>.
+    <UnecessaryComponent @ref="_invokeAsyncDemo">0</UnecessaryComponent><br/>
+    ^^^ This isn't working.  Is not incrementing :(<br/>
+    @secs<br/>
+</p>
+
+<p>
+    <code>RenderFragment&lt;T></code> generic version requires a parameter (of type T) to render.  
+    Internally that value is accessed with <code>@@context</code> special variable by default of the name alias supplied in 'Context' attribute.<br/>
+    Supplying the parameter is done like <code>@@SomeFrag(instOfT)</code>.<br/>
+    <a href="https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#razor-templates">Razor Templates</a> use them.
+    Example usage: <code>bruceTemplate</code>: @bruceTemplate & <code>stringTemplate</code>: @stringTemplate("Some String") 
+</p>
+
+<p>
+    Static assets are stored in <code>wwwroot</code> and reference via base-relative path '/...'.
+    E.G. <a href="/css/app.css" target="_blank">app.css</a>
 </p>
 
 <h4>Miscellaneous</h4>
 <p>
     @@* Comment *@@
 </p>
-
-@* TODO:  
-  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/?view=aspnetcore-5.0#razor-syntax
-  https://docs.microsoft.com/en-us/aspnet/core/blazor/components/lifecycle?view=aspnetcore-5.0
-*@
 
 @code {
     // Why does formatter indent this?
@@ -253,5 +273,36 @@
     }
 
     // Templated Razor Delegates don't appear to work
-    //Func<dynamic, object> petTemplate = @<p>You have a pet named <strong>@item.Name</strong>.</p>;    
+    //Func<dynamic, object> petTemplate = @<p>You have a pet named <strong>@item.Name</strong>.</p>;
+    // Use 'Razor Templates' instead 
+    RenderFragment bruceTemplate = @<text>bruce woz ere</text>;
+
+    RenderFragment<string> stringTemplate = s => @<strong>@s</strong>;
+    
+    private UnecessaryComponent _invokeAsyncDemo;
+    private int secs = 0;
+
+    private async Task NextSec()
+    {
+        await InvokeAsync(() =>
+        {
+            secs++;
+            // Doesn't work... display remains at 0
+            _invokeAsyncDemo.ChildContent = builder =>
+            builder.AddContent(0, secs.ToString());
+            StateHasChanged();
+            // ^^^ This triggers the re-render of the page/component.
+            // So if rendering changes the state (like incrementing a counter) it get's weird. I.e. Don't alter state during render.
+        });
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        new Timer(async (object stateInfo) =>
+        {
+            await NextSec();
+            Console.WriteLine("Timer at " + DateTime.Now);
+        }, null, 1000, 1000);
+    }
 }
